@@ -3,7 +3,7 @@
    Cambia VERSION quando modifichi i file: la cache vecchia
    viene buttata e la nuova scaricata alla visita successiva.
    ============================================================ */
-const VERSION = '2026-11-11.1';
+const VERSION = '2026-11-11.3';
 const CACHE = `lucrezia-${VERSION}`;
 
 const ASSETS = [
@@ -40,7 +40,12 @@ const ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((cache) => cache.addAll(ASSETS))
+      // "reload" salta la cache HTTP: la nuova versione parte sempre pulita.
+      .then((cache) => Promise.all(ASSETS.map(async (url) => {
+        const response = await fetch(url, { cache: 'reload' });
+        if (!response.ok) throw new Error(`Impossibile mettere in cache ${url}`);
+        await cache.put(url, response);
+      })))
       .then(() => self.skipWaiting())
   );
 });
