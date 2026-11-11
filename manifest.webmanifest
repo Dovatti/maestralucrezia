@@ -1,0 +1,19 @@
+{
+  "name": "Il quaderno di Lucrezia",
+  "short_name": "Lucrezia",
+  "description": "Strumenti e giochi per la classe, nel browser.",
+  "lang": "it",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8f0df",
+  "theme_color": "#f8f0df",
+  "icons": [
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

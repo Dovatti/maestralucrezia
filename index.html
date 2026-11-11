@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Il quaderno di Lucrezia — strumenti e giochi per la classe</title>
+  <meta name="description" content="Un piccolo mondo di strumenti e giochi per la scuola primaria: timer, sorteggi, gruppi, lavagna, memory, quiz e molto altro. Tutto nel browser, gratis e senza pubblicità.">
+  <meta name="theme-color" content="#f8f0df">
+  <meta name="color-scheme" content="light">
+
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./assets/favicon.svg">
+  <link rel="manifest" href="./manifest.webmanifest">
+
+  <link rel="preload" href="./assets/fonts/fraunces-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/fonts/nunito-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/views.css">
+
+  <!-- Script classici (non moduli): così il sito funziona anche aperto da file locale. -->
+  <script src="./js/art.js" defer></script>
+  <script src="./js/data.js" defer></script>
+  <script src="./js/core.js" defer></script>
+  <script src="./js/router.js" defer></script>
+  <script src="./js/views/home.js" defer></script>
+  <script src="./js/views/catalogs.js" defer></script>
+  <script src="./js/views/about.js" defer></script>
+  <script src="./js/views/timer.js" defer></script>
+  <script src="./js/views/picker.js" defer></script>
+  <script src="./js/views/groups.js" defer></script>
+  <script src="./js/views/board.js" defer></script>
+  <script src="./js/views/dice.js" defer></script>
+  <script src="./js/views/memory.js" defer></script>
+  <script src="./js/views/tris.js" defer></script>
+  <script src="./js/views/quiz.js" defer></script>
+  <script src="./js/views/simon.js" defer></script>
+  <script src="./js/views/moths.js" defer></script>
+  <script src="./js/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#app">Salta al contenuto</a>
+
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#/" aria-label="Lucrezia, il quaderno magico — torna alla home">
+        <span class="brand__moon" aria-hidden="true">
+          <svg viewBox="0 0 64 64" focusable="false">
+            <path d="M43 8a25 25 0 1 0 13 38A27 27 0 0 1 43 8Z" fill="var(--butter)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+            <circle cx="31" cy="27" r="2.2" fill="var(--ink)"/>
+            <path d="M25 34c3.5 3.5 8.5 3.5 12 0" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M49 15l1.6 4.4L55 21l-4.4 1.6L49 27l-1.6-4.4L43 21l4.4-1.6Z" fill="var(--coral)" stroke="var(--ink)" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="brand__text">
+          <span class="brand__name">Lucrezia</span>
+          <span class="brand__tag">il quaderno magico</span>
+        </span>
+      </a>
+
+      <nav class="main-nav" aria-label="Navigazione principale">
+        <a href="#/strumenti" data-nav="strumenti">Strumenti</a>
+        <a href="#/giochi" data-nav="giochi">Giochi</a>
+        <a href="#/progetto" data-nav="progetto">Il progetto</a>
+      </nav>
+
+      <button class="icon-btn sound-toggle" id="sound-toggle" type="button" aria-pressed="true" aria-label="Disattiva i suoni" title="Suoni attivi">
+        <span data-sound-icon aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="app" class="shell" tabindex="-1"></main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <div class="footer-brand">
+        <span class="footer-brand__name">Il quaderno di Lucrezia</span>
+        <p>Strumenti e giochi fatti a mano per la scuola primaria.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Collegamenti del sito">
+        <a href="#/strumenti">Strumenti</a>
+        <a href="#/giochi">Giochi</a>
+        <a href="#/progetto">Il progetto</a>
+      </nav>
+      <p class="footer-note">
+        <span class="footer-note__dot" aria-hidden="true"></span>
+        Funziona nel browser · niente account · niente pubblicità
+      </p>
+    </div>
+    <div class="footer-stars" aria-hidden="true"></div>
+  </footer>
+
+  <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+  <div class="sparkle-layer" id="sparkle-layer" aria-hidden="true"></div>
+
+  <noscript>
+    <div class="noscript-note">
+      Per usare il quaderno serve JavaScript: attivalo nel browser e ricarica la pagina.
+    </div>
+  </noscript>
+</body>
+</html>
