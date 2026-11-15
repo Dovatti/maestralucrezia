@@ -3,7 +3,7 @@
    Cambia VERSION quando modifichi i file: la cache vecchia
    viene buttata e la nuova scaricata alla visita successiva.
    ============================================================ */
-const VERSION = '2026-11-11.3';
+const VERSION = '2026-11-15.2';
 const CACHE = `lucrezia-${VERSION}`;
 
 const ASSETS = [
@@ -34,7 +34,10 @@ const ASSETS = [
   './js/views/tris.js',
   './js/views/quiz.js',
   './js/views/simon.js',
-  './js/views/moths.js'
+  './js/views/moths.js',
+  './js/views/parola.js',
+  './js/views/anagrammi.js',
+  './js/views/intruso.js'
 ];
 
 self.addEventListener('install', (event) => {

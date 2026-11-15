@@ -20,6 +20,9 @@ Niente account, niente database, niente pubblicità: solo HTML, CSS, JavaScript 
 - Quiz lampo di matematica, tre livelli e sessanta secondi.
 - Le campanelle, un Simon con quattro note.
 - La casa delle falene, trenta secondi di riflessi.
+- La parola segreta, con indizi, categorie e sei lune di vite.
+- Anagrammi incantati, per rimettere in ordine le lettere in sessanta secondi.
+- Trova l’intruso, dieci domande di logica con tre vite.
 
 ## Provarlo in locale
 

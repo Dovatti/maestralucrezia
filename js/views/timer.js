@@ -144,10 +144,7 @@
 
         startButton.textContent = done ? 'Ricomincia' : running ? 'Pausa' : remaining < total ? 'Riprendi' : 'Avvia';
         status.textContent = done ? 'Tempo scaduto!' : running ? 'Il tempo scorre…' : remaining < total ? 'In pausa' : 'Pronto quando vuoi.';
-        customInput.value = String(minutes);
-        presetButtons.forEach((button) => {
-          button.setAttribute('aria-pressed', String(Number(button.dataset.minutes) === minutes));
-        });
+        App.ui.syncPressed(presetButtons, (button) => Number(button.dataset.minutes) === minutes);
       }
 
       function setMinutes(value) {
@@ -156,6 +153,7 @@
         remaining = total;
         running = false;
         done = false;
+        customInput.value = String(minutes);
         App.store.set('timer.minutes', minutes);
         App.sound.click();
         paint();
@@ -208,11 +206,11 @@
         fullscreenLabel.textContent = document.fullscreenElement ? 'Esci' : 'Schermo intero';
       });
       ctx.on(window, 'keydown', (event) => {
+        if (event.code !== 'Space' || event.repeat) return;
         const tag = document.activeElement ? document.activeElement.tagName : '';
-        if (event.code === 'Space' && !['INPUT', 'TEXTAREA', 'BUTTON', 'SELECT'].includes(tag)) {
-          event.preventDefault();
-          toggle();
-        }
+        if (['INPUT', 'TEXTAREA', 'BUTTON', 'SELECT', 'A'].includes(tag)) return;
+        event.preventDefault();
+        toggle();
       });
 
       paint();

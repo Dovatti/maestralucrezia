@@ -73,15 +73,19 @@
   }
 
   /** Intero casuale in [0, max). Usa crypto quando disponibile. */
+  const RANDOM_SPACE = 0x100000000;
+  const randomBuffer = new Uint32Array(1);
+
   function randInt(max) {
     if (max <= 0) return 0;
+    if (max >= RANDOM_SPACE) return Math.floor(Math.random() * max);
     if (window.crypto && window.crypto.getRandomValues) {
-      const limit = Math.floor(0xffffffff / max) * max;
-      const buffer = new Uint32Array(1);
+      // Rifiuta i valori che introdurrebbero uno sbilanciamento nella divisione.
+      const limit = Math.floor(RANDOM_SPACE / max) * max;
       let value;
       do {
-        window.crypto.getRandomValues(buffer);
-        value = buffer[0];
+        window.crypto.getRandomValues(randomBuffer);
+        value = randomBuffer[0];
       } while (value >= limit);
       return value % max;
     }
@@ -126,6 +130,26 @@
       } catch (error) {
         /* Modalità privata o spazio pieno: il sito continua a funzionare. */
       }
+    }
+  };
+
+  /** L'elenco dei nomi è condiviso da sorteggio e fabbrica di gruppi. */
+  const names = {
+    KEY: 'class.names',
+    parse(text) {
+      return String(text || '')
+        .split('\n')
+        .map((name) => name.trim())
+        .filter(Boolean);
+    },
+    load() {
+      const saved = store.get(names.KEY, null);
+      return Array.isArray(saved) ? saved.filter((name) => typeof name === 'string' && name.trim()) : [];
+    },
+    save(text) {
+      const parsed = names.parse(text);
+      store.set(names.KEY, parsed);
+      return parsed;
     }
   };
 
@@ -347,9 +371,24 @@
       el('span', { class: 'card__body' }, [
         el('span', { class: 'card__title', text: item.title }),
         el('span', { class: 'card__tagline', text: item.tagline }),
-        el('span', { class: 'card__tags' }, item.tags.map((tag) => el('span', { class: 'tag', text: tag })))
+        el('span', { class: 'card__tags' }, (item.tags || []).map((tag) => el('span', { class: 'tag', text: tag })))
       ]),
       el('span', { class: 'card__arrow', html: App.art.ui.arrowRight })
+    ]);
+  }
+
+  /** Allinea l'aria-pressed di un gruppo di bottoni allo stato corrente. */
+  function syncPressed(buttons, isPressed) {
+    buttons.forEach((button) => {
+      button.setAttribute('aria-pressed', String(Boolean(isPressed(button))));
+    });
+  }
+
+  /** Una statistica dell'HUD: valore (nodo o testo) + etichetta. */
+  function hudStat(value, label) {
+    return el('div', { class: 'hud-stat' }, [
+      value instanceof Node ? value : el('strong', { text: String(value) }),
+      el('span', { text: label })
     ]);
   }
 
@@ -408,6 +447,7 @@
   App.dom = { $, $$, el, on, append };
   App.util = { clamp, clock, randInt, shuffle, pick, splitIntoGroups, reducedMotion };
   App.store = store;
+  App.names = names;
   App.sound = sound;
   App.ui = {
     toast,
@@ -416,6 +456,8 @@
     page,
     sectionHead,
     card,
+    syncPressed,
+    hudStat,
     resultPanel,
     toggleFullscreen,
     downloadCanvas

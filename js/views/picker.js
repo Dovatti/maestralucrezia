@@ -7,21 +7,13 @@
 
   const { el } = App.dom;
 
-  const STORAGE_NAMES = 'class.names';
   const STORAGE_NOREPEAT = 'picker.noRepeat';
-
-  function readNames(text) {
-    return text
-      .split('\n')
-      .map((name) => name.trim())
-      .filter(Boolean);
-  }
 
   App.router.register('sorteggio', {
     title: 'La carta del sorteggio',
     section: 'strumenti',
     mount(root, ctx) {
-      const stored = App.store.get(STORAGE_NAMES, null);
+      const stored = App.names.load();
       let noRepeat = Boolean(App.store.get(STORAGE_NOREPEAT, true));
       let drawing = false;
       const drawn = new Set();
@@ -48,7 +40,7 @@
         'aria-label': 'Nomi da sorteggiare, uno per riga',
         placeholder: 'Un nome per riga:\nAda\nBruno\nClara…'
       });
-      textarea.value = (stored && stored.length ? stored : App.data.demoNames).join('\n');
+      textarea.value = (stored.length ? stored : App.data.demoNames).join('\n');
 
       const counter = el('p', { class: 'counter', 'aria-live': 'polite' });
       const noRepeatInput = el('input', { type: 'checkbox', checked: noRepeat });
@@ -88,18 +80,14 @@
       root.append(page);
 
       function paintCounter() {
-        const names = readNames(textarea.value);
+        const names = App.names.parse(textarea.value);
         const excluded = noRepeat ? names.filter((name) => drawn.has(name)).length : 0;
         counter.textContent = `${names.length} ${names.length === 1 ? 'nome' : 'nomi'} in elenco${excluded ? ` · ${excluded} già estratti` : ''}`;
       }
 
-      function saveNames() {
-        App.store.set(STORAGE_NAMES, readNames(textarea.value));
-      }
-
       function draw() {
         if (drawing) return;
-        const names = readNames(textarea.value);
+        const names = App.names.parse(textarea.value);
         if (names.length < 1) {
           App.ui.toast('Scrivi almeno un nome nell’elenco.', 'error');
           textarea.focus();
@@ -150,7 +138,7 @@
 
       textarea.addEventListener('input', () => {
         drawn.clear();
-        saveNames();
+        App.names.save(textarea.value);
         paintCounter();
       });
       noRepeatInput.addEventListener('change', () => {

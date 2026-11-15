@@ -26,7 +26,7 @@
 
       const levelStat = el('strong', { text: '0' });
       const bestStat = el('strong', { text: String(best) });
-      const status = el('p', { class: 'simon-status', 'aria-live': 'polite' });
+      const status = el('p', { class: 'game-status simon-status', 'aria-live': 'polite' });
       const resultArea = el('div', { class: 'simon-result' });
 
       const bells = BELLS.map((bell, index) =>
@@ -49,8 +49,8 @@
 
       const hud = el('div', { class: 'game-hud' }, [
         el('div', { class: 'hud-stats' }, [
-          el('div', { class: 'hud-stat' }, [levelStat, el('span', { text: 'livello' })]),
-          el('div', { class: 'hud-stat' }, [bestStat, el('span', { text: 'record' })])
+          App.ui.hudStat(levelStat, 'livello'),
+          App.ui.hudStat(bestStat, 'record')
         ]),
         startButton
       ]);
@@ -190,6 +190,7 @@
       }
 
       ctx.on(window, 'keydown', (event) => {
+        if (event.repeat) return;
         const number = Number(event.key);
         if (number >= 1 && number <= 4 && phase === 'input') {
           const bell = bells[number - 1];

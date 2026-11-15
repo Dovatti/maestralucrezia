@@ -36,6 +36,8 @@
       let currentStroke = null;
       let lastPoint = null;
       let resizeFrame = 0;
+      let viewWidth = 1;
+      let viewHeight = 1;
 
       const canvas = el('canvas', { 'aria-label': 'Lavagna per disegnare' });
       const frame = el('div', { class: 'board-frame' }, canvas);
@@ -146,15 +148,11 @@
 
       /* ---- Stato visivo ---- */
       function paintSwatches() {
-        swatches.forEach((button) => {
-          button.setAttribute('aria-pressed', String(!erasing && button.dataset.color === color));
-        });
+        App.ui.syncPressed(swatches, (button) => !erasing && button.dataset.color === color);
       }
 
       function paintSizes() {
-        sizeButtons.forEach((button) => {
-          button.setAttribute('aria-pressed', String(Number(button.dataset.size) === size));
-        });
+        App.ui.syncPressed(sizeButtons, (button) => Number(button.dataset.size) === size);
       }
 
       function setErasing(value) {
@@ -177,43 +175,40 @@
         };
       }
 
+      /** Le misure in pixel CSS: una sola lettura del layout per ogni disegno. */
+      function measure() {
+        viewWidth = Math.max(1, frame.clientWidth);
+        viewHeight = Math.max(1, frame.clientHeight);
+      }
+
       function styleContext(stroke) {
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        const unit = Math.min(width, height);
         context.lineCap = 'round';
         context.lineJoin = 'round';
-        context.lineWidth = (stroke.size / REFERENCE_SIZE) * unit;
+        context.lineWidth = (stroke.size / REFERENCE_SIZE) * Math.min(viewWidth, viewHeight);
         context.strokeStyle = stroke.color;
         context.fillStyle = stroke.color;
         context.globalCompositeOperation = stroke.erase ? 'destination-out' : 'source-over';
       }
 
       function drawPoint(stroke, point) {
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
         styleContext(stroke);
         context.beginPath();
-        context.arc(point.x * width, point.y * height, context.lineWidth / 2, 0, Math.PI * 2);
+        context.arc(point.x * viewWidth, point.y * viewHeight, context.lineWidth / 2, 0, Math.PI * 2);
         context.fill();
         context.globalCompositeOperation = 'source-over';
       }
 
       function drawSegment(stroke, from, to) {
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
         styleContext(stroke);
         context.beginPath();
-        context.moveTo(from.x * width, from.y * height);
-        context.lineTo(to.x * width, to.y * height);
+        context.moveTo(from.x * viewWidth, from.y * viewHeight);
+        context.lineTo(to.x * viewWidth, to.y * viewHeight);
         context.stroke();
         context.globalCompositeOperation = 'source-over';
       }
 
       function redraw() {
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        context.clearRect(0, 0, width, height);
+        context.clearRect(0, 0, viewWidth, viewHeight);
         strokes.forEach((stroke) => {
           if (stroke.points.length === 1) drawPoint(stroke, stroke.points[0]);
           for (let index = 1; index < stroke.points.length; index += 1) {
@@ -224,9 +219,10 @@
 
       function resize() {
         if (!context) return;
+        measure();
         const ratio = Math.min(window.devicePixelRatio || 1, 2);
-        const width = Math.max(1, Math.round(frame.clientWidth * ratio));
-        const height = Math.max(1, Math.round(frame.clientHeight * ratio));
+        const width = Math.max(1, Math.round(viewWidth * ratio));
+        const height = Math.max(1, Math.round(viewHeight * ratio));
         if (canvas.width !== width || canvas.height !== height) {
           canvas.width = width;
           canvas.height = height;
@@ -238,6 +234,7 @@
       canvas.addEventListener('pointerdown', (event) => {
         if (event.pointerType === 'mouse' && event.button !== 0) return;
         event.preventDefault();
+        measure();
         canvas.setPointerCapture(event.pointerId);
         const point = pointFromEvent(event);
         currentStroke = {
@@ -257,8 +254,8 @@
         if (!currentStroke) return;
         event.preventDefault();
         const point = pointFromEvent(event);
-        const dx = (point.x - lastPoint.x) * canvas.clientWidth;
-        const dy = (point.y - lastPoint.y) * canvas.clientHeight;
+        const dx = (point.x - lastPoint.x) * viewWidth;
+        const dy = (point.y - lastPoint.y) * viewHeight;
         if (dx * dx + dy * dy < 1.2) return;
         currentStroke.points.push(point);
         drawSegment(currentStroke, lastPoint, point);

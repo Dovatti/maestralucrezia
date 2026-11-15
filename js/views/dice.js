@@ -107,9 +107,7 @@
       root.append(page);
 
       function paintDiceCount() {
-        diceCountButtons.forEach((button) => {
-          button.setAttribute('aria-pressed', String(Number(button.dataset.count) === diceCount));
-        });
+        App.ui.syncPressed(diceCountButtons, (button) => Number(button.dataset.count) === diceCount);
         rollButton.textContent = diceCount === 1 ? 'Tira il dado' : 'Tira i dadi';
       }
 

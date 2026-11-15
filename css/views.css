@@ -754,9 +754,6 @@
   height: auto;
   filter: drop-shadow(3px 4px 0 rgba(42, 27, 53, 0.25));
 }
-.die.is-rolling {
-  animation: dice-roll 0.5s ease;
-}
 .dice-result {
   font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 3rem);
@@ -824,6 +821,18 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
+}
+.game-start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: clamp(1.4rem, 4vw, 2.4rem);
+  text-align: center;
+}
+.game-start__art {
+  width: 84px;
+  transform: rotate(-6deg);
 }
 
 /* ============================================================
@@ -909,11 +918,7 @@
   cursor: default;
 }
 .memory-status {
-  min-height: 1.5em;
-  color: var(--plum);
-  font-family: var(--font-hand);
   font-size: 1.4rem;
-  text-align: center;
 }
 
 /* ============================================================
@@ -964,9 +969,6 @@
 }
 .tris-status {
   min-height: 1.6em;
-  color: var(--plum);
-  font-family: var(--font-hand);
-  font-size: 1.5rem;
 }
 .tris-score {
   display: flex;
@@ -989,7 +991,8 @@
   gap: 0.8rem;
   margin-bottom: 1rem;
 }
-.quiz-bar {
+.quiz-bar,
+.game-bar {
   height: 12px;
   margin-bottom: 1.4rem;
   overflow: hidden;
@@ -997,12 +1000,13 @@
   border-radius: 999px;
   background: var(--paper-2);
 }
-.quiz-bar > span {
+.quiz-bar > span,
+.game-bar > span {
   display: block;
   width: 100%;
   height: 100%;
   background: var(--teal);
-  transition: width 0.12s linear;
+  transition: width 0.12s linear, background 0.3s;
 }
 .quiz-question {
   margin: 1.2rem 0 1.6rem;
@@ -1041,18 +1045,6 @@
 .quiz-feedback {
   min-height: 1.6em;
   margin-top: 1rem;
-  color: var(--plum);
-  font-family: var(--font-hand);
-  font-size: 1.5rem;
-  text-align: center;
-}
-.quiz-start {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: clamp(1.4rem, 4vw, 2.4rem);
-  text-align: center;
 }
 .quiz-start__moon {
   width: 74px;
@@ -1125,13 +1117,7 @@
   opacity: 0.55;
   cursor: default;
 }
-.simon-status {
-  min-height: 1.5em;
-  color: var(--plum);
-  font-family: var(--font-hand);
-  font-size: 1.5rem;
-  text-align: center;
-}
+
 
 /* ============================================================
    CASA DELLE FALENE
@@ -1219,14 +1205,6 @@
 .window:disabled {
   cursor: default;
 }
-.moth-start {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: clamp(1.4rem, 4vw, 2.4rem);
-  text-align: center;
-}
 .moth-start__art {
   width: 104px;
   transform: rotate(-6deg);
@@ -1234,10 +1212,276 @@
 .moth-status {
   min-height: 1.6em;
   margin-top: 1rem;
+}
+
+/* ============================================================
+   LA PAROLA SEGRETA
+   ============================================================ */
+.parola-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(250px, 0.8fr);
+  gap: clamp(1.2rem, 3vw, 2rem);
+  align-items: start;
+}
+.parola-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  padding: clamp(1.2rem, 3vw, 2rem);
+  border: 2px solid var(--ink);
+  border-radius: 24px 18px 26px 20px;
+  background: linear-gradient(160deg, var(--lilac), var(--bone) 70%);
+  text-align: center;
+}
+.parola-category {
   color: var(--plum);
   font-family: var(--font-hand);
-  font-size: 1.5rem;
+  font-size: 1.3rem;
+}
+.secret-word {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+}
+.letter-slot {
+  display: grid;
+  place-items: center;
+  width: clamp(30px, 6vw, 48px);
+  height: clamp(40px, 8vw, 60px);
+  border-bottom: 3px solid var(--ink);
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  font-weight: 650;
+  line-height: 1;
+}
+.letter-slot.is-filled {
+  border-bottom-color: var(--coral);
+  color: var(--ink);
+  animation: pop 0.25s var(--ease-bounce);
+}
+.parola-hint {
+  max-width: 46ch;
+  color: var(--ink-soft);
+}
+.parola-hint__label {
+  color: var(--plum);
+  font-family: var(--font-hand);
+  font-size: 1.2rem;
+}
+.parola-side {
+  gap: 0.65rem;
+}
+.parola-side .panel__title:not(:first-child) {
+  margin-top: 0.4rem;
+}
+.parola-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.alphabet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.letter-key {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--bone);
+  box-shadow: 2px 2px 0 var(--ink);
+  font-size: 0.9rem;
+  font-weight: 800;
+  transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+}
+.letter-key:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  background: var(--butter);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.letter-key.is-right {
+  background: var(--mint);
+}
+.letter-key.is-wrong {
+  background: var(--coral-soft);
+  text-decoration: line-through;
+}
+.letter-key:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+.parola-status {
+  min-height: 1.6em;
+}
+.hud-stat .lives {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+.life {
+  width: 15px;
+  height: 15px;
+  transition: opacity 0.2s, filter 0.2s;
+}
+.life svg {
+  width: 100%;
+  height: 100%;
+}
+.life.is-lost {
+  opacity: 0.2;
+  filter: grayscale(1);
+}
+
+/* ============================================================
+   ANAGRAMMI
+   ============================================================ */
+.anagram-layout,
+.intruso-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 760px;
+  margin-inline: auto;
+}
+.anagram-layout .game-bar,
+.intruso-layout .game-bar {
+  margin-bottom: 0;
+}
+.anagram-hint {
+  padding: 0.9rem 1.1rem;
+  border: 2px dashed rgba(42, 27, 53, 0.32);
+  border-radius: 16px;
+  background: rgba(255, 250, 240, 0.65);
   text-align: center;
+}
+.anagram-hint__category {
+  color: var(--plum);
+  font-family: var(--font-hand);
+  font-size: 1.2rem;
+}
+.anagram-hint__text {
+  margin-top: 0.15rem;
+  color: var(--ink-soft);
+}
+.anagram-answer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: clamp(52px, 10vw, 68px);
+  padding: 0.4rem;
+}
+.answer-slot {
+  display: grid;
+  place-items: center;
+  width: clamp(38px, 7vw, 54px);
+  height: clamp(46px, 9vw, 62px);
+  padding: 0;
+  border: 2px solid var(--ink);
+  border-radius: 10px 12px 9px 13px;
+  background: var(--bone);
+  box-shadow: 2px 3px 0 var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 650;
+}
+.answer-slot.is-empty {
+  border-style: dashed;
+  background: var(--paper-2);
+  box-shadow: none;
+}
+.answer-slot.is-filled {
+  background: var(--butter);
+}
+.anagram-answer.is-wrong {
+  animation: shake 0.3s;
+}
+.letter-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+}
+.letter-tile {
+  display: grid;
+  place-items: center;
+  width: clamp(42px, 8vw, 56px);
+  height: clamp(46px, 9vw, 60px);
+  padding: 0;
+  border: 2.5px solid var(--ink);
+  border-radius: 12px 14px 11px 15px;
+  background: var(--bone);
+  box-shadow: 3px 4px 0 var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+  font-weight: 650;
+  transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+}
+.letter-tile:hover:not(:disabled) {
+  transform: translate(-1px, -2px);
+  background: var(--butter);
+  box-shadow: 4px 6px 0 var(--ink);
+}
+.letter-tile.is-used {
+  box-shadow: none;
+  opacity: 0.28;
+}
+.anagram-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+.anagram-status,
+.intruso-status {
+  min-height: 1.6em;
+}
+
+/* ============================================================
+   TROVA L'INTRUSO
+   ============================================================ */
+.intruso-question {
+  margin: 0.4rem 0 0;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  text-align: center;
+}
+.intruso-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+.intruso-option {
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 2.5px solid var(--ink);
+  border-radius: 18px 14px 20px 12px;
+  background: var(--bone);
+  box-shadow: 3px 4px 0 var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.6vw, 1.6rem);
+  font-weight: 650;
+  transition: transform 0.14s, box-shadow 0.14s, background 0.14s;
+}
+.intruso-option:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: var(--butter);
+  box-shadow: 4px 6px 0 var(--ink);
+}
+.intruso-option.is-correct {
+  background: var(--mint);
+}
+.intruso-option.is-wrong {
+  background: var(--coral-soft);
+  animation: shake 0.3s;
+}
+.intruso-option:disabled {
+  cursor: default;
 }
 
 /* ============================================================
@@ -1261,20 +1505,6 @@
   }
   100% {
     transform: scale(1) rotate(0);
-  }
-}
-@keyframes dice-roll {
-  0% {
-    transform: rotate(0) scale(1);
-  }
-  30% {
-    transform: rotate(-18deg) scale(1.08);
-  }
-  60% {
-    transform: rotate(14deg) scale(0.96);
-  }
-  100% {
-    transform: rotate(0) scale(1);
   }
 }
 @keyframes coin-flip {
@@ -1349,6 +1579,7 @@
   .picker-layout,
   .groups-layout,
   .tris-layout,
+  .parola-layout,
   .about-layout {
     grid-template-columns: 1fr;
   }
@@ -1378,8 +1609,19 @@
     min-height: 260px;
     padding: 1.4rem;
   }
-  .quiz-options {
+  .quiz-options,
+  .intruso-options {
     grid-template-columns: 1fr;
+  }
+  .parola-board {
+    padding: 1rem;
+  }
+  .alphabet {
+    gap: 0.25rem;
+  }
+  .letter-key {
+    width: 32px;
+    height: 32px;
   }
   .simon-grid {
     grid-template-columns: repeat(2, minmax(96px, 1fr));

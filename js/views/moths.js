@@ -20,6 +20,7 @@
       let best = Number(App.store.get('moths.best', 0)) || 0;
       let endAt = 0;
       let spawnTimer = 0;
+      let roundToken = 0;
 
       /* ---- Statistiche in alto ---- */
       const scoreStat = el('strong', { text: '0' });
@@ -28,9 +29,9 @@
 
       const hud = el('div', { class: 'game-hud' }, [
         el('div', { class: 'hud-stats' }, [
-          el('div', { class: 'hud-stat' }, [scoreStat, el('span', { text: 'prese' })]),
-          el('div', { class: 'hud-stat' }, [timeStat, el('span', { text: 'tempo' })]),
-          el('div', { class: 'hud-stat' }, [bestStat, el('span', { text: 'record' })])
+          App.ui.hudStat(scoreStat, 'prese'),
+          App.ui.hudStat(timeStat, 'tempo'),
+          App.ui.hudStat(bestStat, 'record')
         ])
       ]);
 
@@ -53,11 +54,11 @@
         'aria-label': 'La casa delle falene'
       }, windows);
 
-      const status = el('p', { class: 'moth-status', 'aria-live': 'polite' });
+      const status = el('p', { class: 'game-status moth-status', 'aria-live': 'polite' });
       const gameView = el('div', { class: 'moth-layout' }, [house, status]);
 
       /* ---- Schermata iniziale ---- */
-      const startView = el('div', { class: 'moth-start' }, [
+      const startView = el('div', { class: 'game-start' }, [
         el('div', { class: 'moth-start__art', html: App.art.icons.moths }),
         el('h2', { text: 'La casa è piena di falene!' }),
         el('p', {
@@ -82,23 +83,28 @@
       page.append(stage);
       root.append(page);
 
+      const secondsPlayed = () => DURATION - Math.max(0, (endAt - performance.now()) / 1000);
+
       function paintHud() {
         scoreStat.textContent = String(score);
         bestStat.textContent = String(best);
         timeStat.textContent = App.util.clock(Math.max(0, (endAt - performance.now()) / 1000));
       }
 
-      function clearWindows() {
-        windows.forEach((windowEl, index) => {
-          windowEl.replaceChildren();
-          windowEl.classList.remove('is-caught');
-          windowEl.classList.add('is-empty');
-          windowEl.disabled = true;
-          windowEl.setAttribute('aria-label', `Finestra ${index + 1}, vuota`);
-        });
+      function resetWindow(index) {
+        const windowEl = windows[index];
+        windowEl.replaceChildren();
+        windowEl.classList.remove('is-caught');
+        windowEl.classList.add('is-empty');
+        windowEl.disabled = true;
+        windowEl.setAttribute('aria-label', `Finestra ${index + 1}, vuota`);
       }
 
-      function openWindow(index, duration) {
+      function clearWindows() {
+        windows.forEach((windowEl, index) => resetWindow(index));
+      }
+
+      function openWindow(index, duration, token) {
         const windowEl = windows[index];
         if (!windowEl || !windowEl.classList.contains('is-empty')) return;
 
@@ -111,31 +117,27 @@
 
         // Dopo un po' la falena scappa, se nessuno l'ha presa.
         ctx.timeout(() => {
-          if (state !== 'playing' || windowEl.classList.contains('is-caught')) return;
-          windowEl.replaceChildren();
-          windowEl.classList.add('is-empty');
-          windowEl.disabled = true;
-          windowEl.setAttribute('aria-label', `Finestra ${index + 1}, vuota`);
+          if (token !== roundToken || state !== 'playing' || windowEl.classList.contains('is-caught')) return;
+          resetWindow(index);
           App.sound.tick();
         }, duration);
       }
 
-      function spawnMoth() {
-        if (state !== 'playing') return;
+      function spawnMoth(token) {
+        if (token !== roundToken || state !== 'playing') return;
+        const played = secondsPlayed();
 
         const free = windows
           .map((windowEl, index) => (windowEl.classList.contains('is-empty') ? index : -1))
           .filter((index) => index >= 0);
 
         if (free.length) {
-          const elapsed = DURATION - Math.max(0, (endAt - performance.now()) / 1000);
-          const visibleFor = Math.max(650, 1450 - elapsed * 18);
-          openWindow(App.util.pick(free), visibleFor);
+          const visibleFor = Math.max(650, 1450 - played * 18);
+          openWindow(App.util.pick(free), visibleFor, token);
         }
 
-        const elapsed = DURATION - Math.max(0, (endAt - performance.now()) / 1000);
-        const nextSpawn = Math.max(260, 720 - elapsed * 9);
-        spawnTimer = ctx.timeout(spawnMoth, nextSpawn);
+        const nextSpawn = Math.max(260, 720 - played * 9);
+        spawnTimer = ctx.timeout(() => spawnMoth(token), nextSpawn);
       }
 
       function catchMoth(index) {
@@ -153,15 +155,16 @@
         status.textContent = score === 1 ? 'Prima falena presa!' : `Falene prese: ${score}`;
 
         // La falena sparisce con la sua piccola animazione.
+        const token = roundToken;
         ctx.timeout(() => {
-          windowEl.replaceChildren();
-          windowEl.classList.remove('is-caught');
-          windowEl.classList.add('is-empty');
-          windowEl.setAttribute('aria-label', `Finestra ${index + 1}, vuota`);
+          if (token !== roundToken) return;
+          resetWindow(index);
         }, 320);
       }
 
       function startGame() {
+        roundToken += 1;
+        const token = roundToken;
         state = 'playing';
         score = 0;
         endAt = performance.now() + DURATION * 1000;
@@ -174,12 +177,13 @@
         App.sound.click();
 
         // Le prime falene arrivano subito, poi il ritmo cresce.
-        spawnTimer = ctx.timeout(spawnMoth, 350);
+        spawnTimer = ctx.timeout(() => spawnMoth(token), 350);
       }
 
       function endGame() {
         if (state !== 'playing') return;
         state = 'over';
+        roundToken += 1;
         clearWindows();
         window.clearTimeout(spawnTimer);
 

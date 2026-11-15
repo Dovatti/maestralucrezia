@@ -27,9 +27,10 @@
       let moves = 0;
       let startTime = null;
       let finished = false;
+      let roundToken = 0;
 
       const grid = el('div', { class: 'memory-grid', style: { '--cols': '4' } });
-      const status = el('p', { class: 'memory-status', 'aria-live': 'polite' });
+      const status = el('p', { class: 'game-status memory-status', 'aria-live': 'polite' });
       const resultArea = el('div', { class: 'memory-result' });
 
       const pairsStat = el('strong', { text: '0' });
@@ -55,9 +56,9 @@
 
       const hud = el('div', { class: 'game-hud' }, [
         el('div', { class: 'hud-stats' }, [
-          el('div', { class: 'hud-stat' }, [pairsStat, el('span', { text: 'coppie' })]),
-          el('div', { class: 'hud-stat' }, [movesStat, el('span', { text: 'mosse' })]),
-          el('div', { class: 'hud-stat' }, [timeStat, el('span', { text: 'tempo' })])
+          App.ui.hudStat(pairsStat, 'coppie'),
+          App.ui.hudStat(movesStat, 'mosse'),
+          App.ui.hudStat(timeStat, 'tempo')
         ]),
         el('div', { class: 'game-actions' }, [
           el('div', { class: 'segmented', role: 'group', 'aria-label': 'Livello' }, levelButtons),
@@ -91,12 +92,11 @@
       }
 
       function paintLevels() {
-        levelButtons.forEach((button) => {
-          button.setAttribute('aria-pressed', String(Number(button.dataset.pairs) === pairs));
-        });
+        App.ui.syncPressed(levelButtons, (button) => Number(button.dataset.pairs) === pairs);
       }
 
       function startGame(nextPairs) {
+        roundToken += 1;
         pairs = nextPairs;
         App.store.set('memory.pairs', pairs);
         deck = App.util.shuffle(App.data.memoryPairs.slice(0, pairs)).flatMap((pair, index) => [
@@ -158,8 +158,6 @@
         lock = true;
 
         if (deck[first].name === deck[second].name) {
-          deck[first].matched = true;
-          deck[second].matched = true;
           cards[first].classList.add('is-matched');
           cards[second].classList.add('is-matched');
           cards[first].disabled = true;
@@ -179,7 +177,10 @@
         cards[first].classList.add('is-wrong');
         cards[second].classList.add('is-wrong');
         status.textContent = 'Non è la stessa carta. Riprova!';
+        const token = roundToken;
         ctx.timeout(() => {
+          // Se nel frattempo si ricomincia, le carte nuove non vanno toccate.
+          if (token !== roundToken) return;
           cards[first].classList.remove('is-flipped', 'is-wrong');
           cards[second].classList.remove('is-flipped', 'is-wrong');
           cards[first].setAttribute('aria-label', `Carta ${first + 1}, coperta`);

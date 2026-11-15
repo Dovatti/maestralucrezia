@@ -91,7 +91,7 @@
       let difficulty = App.store.get('tris.difficulty', 'furba') === 'gentile' ? 'gentile' : 'furba';
       let score = { X: 0, O: 0, draw: 0 };
 
-      const status = el('p', { class: 'tris-status', 'aria-live': 'polite' });
+      const status = el('p', { class: 'game-status tris-status', 'aria-live': 'polite' });
       const scoreX = el('strong', { text: '0' });
       const scoreO = el('strong', { text: '0' });
       const scoreDraw = el('strong', { text: '0' });
@@ -144,9 +144,9 @@
       const panel = el('div', { class: 'tris-panel' }, [
         status,
         el('div', { class: 'tris-score' }, [
-          el('div', { class: 'hud-stat' }, [scoreX, el('span', { text: 'falena' })]),
-          el('div', { class: 'hud-stat' }, [scoreO, el('span', { text: 'chiave' })]),
-          el('div', { class: 'hud-stat' }, [scoreDraw, el('span', { text: 'pari' })])
+          App.ui.hudStat(scoreX, 'falena'),
+          App.ui.hudStat(scoreO, 'chiave'),
+          App.ui.hudStat(scoreDraw, 'pari')
         ]),
         el('div', { class: 'segmented', role: 'group', 'aria-label': 'Modalità' }, modeButtons),
         difficultyGroup,
@@ -173,12 +173,8 @@
       }
 
       function paintControls() {
-        modeButtons.forEach((button) => {
-          button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
-        });
-        difficultyButtons.forEach((button) => {
-          button.setAttribute('aria-pressed', String(button.dataset.difficulty === difficulty));
-        });
+        App.ui.syncPressed(modeButtons, (button) => button.dataset.mode === mode);
+        App.ui.syncPressed(difficultyButtons, (button) => button.dataset.difficulty === difficulty);
         difficultyGroup.hidden = mode !== '1p';
       }
 
@@ -268,6 +264,9 @@
       function finish(win) {
         over = true;
         aiThinking = false;
+        cells.forEach((cell) => {
+          cell.disabled = true;
+        });
         if (win) {
           win.line.forEach((index) => cells[index].classList.add('is-win'));
           score[win.mark] += 1;

@@ -7,23 +7,15 @@
   const { el } = App.dom;
   const { clamp } = App.util;
 
-  const STORAGE_NAMES = 'class.names';
   const STORAGE_COUNT = 'groups.count';
   const MIN_GROUPS = 2;
   const MAX_GROUPS = 8;
-
-  function readNames(text) {
-    return text
-      .split('\n')
-      .map((name) => name.trim())
-      .filter(Boolean);
-  }
 
   App.router.register('gruppi', {
     title: 'Fabbrica di gruppi',
     section: 'strumenti',
     mount(root, ctx) {
-      const stored = App.store.get(STORAGE_NAMES, null);
+      const stored = App.names.load();
       let count = clamp(Number(App.store.get(STORAGE_COUNT, 3)) || 3, MIN_GROUPS, MAX_GROUPS);
       let hasGroups = false;
 
@@ -34,7 +26,7 @@
         'aria-label': 'Nomi da dividere in gruppi, uno per riga',
         placeholder: 'Un nome per riga…'
       });
-      textarea.value = (stored && stored.length ? stored : App.data.demoNames).join('\n');
+      textarea.value = (stored.length ? stored : App.data.demoNames).join('\n');
 
       const countValue = el('span', { class: 'stepper__value', text: String(count), 'aria-live': 'polite' });
       const minusButton = el('button', {
@@ -115,7 +107,7 @@
       }
 
       function createGroups() {
-        const names = readNames(textarea.value);
+        const names = App.names.parse(textarea.value);
         if (names.length < 2) {
           App.ui.toast('Servono almeno due nomi per fare i gruppi.', 'error');
           textarea.focus();
@@ -155,14 +147,14 @@
         resultArea.replaceChildren(grid);
         summary.textContent = `${groupCount} ${groupCount === 1 ? 'gruppo' : 'gruppi'} · ${names.length} nomi`;
         printButton.disabled = false;
-        createButton.textContent = hasGroups ? 'Rimescola' : 'Crea i gruppi';
         hasGroups = true;
+        createButton.textContent = 'Rimescola';
         App.sound.success();
         App.ui.sparkles(grid, 16);
       }
 
       textarea.addEventListener('input', () => {
-        App.store.set(STORAGE_NAMES, readNames(textarea.value));
+        App.names.save(textarea.value);
       });
 
       setCount(count);

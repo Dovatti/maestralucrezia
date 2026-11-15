@@ -113,6 +113,7 @@
       let streak = 0;
       let locked = false;
       let currentQuestion = null;
+      let optionButtons = [];
       let endAt = 0;
 
       /* ---- Schermata iniziale ---- */
@@ -133,7 +134,7 @@
         text: 'Inizia il quiz',
         on: { click: () => startGame() }
       });
-      const startView = el('div', { class: 'quiz-start' }, [
+      const startView = el('div', { class: 'game-start' }, [
         el('div', { class: 'quiz-start__moon', html: App.art.icons.moon }),
         el('h2', { text: 'Quanti ne sai?' }),
         el('p', { class: 'hint', text: '10 domande · 60 secondi · 4 risposte. Scegli il livello e via!' }),
@@ -150,7 +151,7 @@
       const bar = el('div', { class: 'quiz-bar' }, barFill);
       const questionEl = el('h2', { class: 'quiz-question', 'aria-live': 'polite' });
       const optionsEl = el('div', { class: 'quiz-options' });
-      const feedback = el('p', { class: 'quiz-feedback', 'aria-live': 'polite' });
+      const feedback = el('p', { class: 'game-status quiz-feedback', 'aria-live': 'polite' });
 
       const gameView = el('div', { class: 'quiz-layout' }, [
         el('div', { class: 'quiz-top' }, [
@@ -176,9 +177,7 @@
       function selectLevel(nextLevel) {
         level = nextLevel;
         App.store.set('quiz.level', level);
-        levelButtons.forEach((button) => {
-          button.setAttribute('aria-pressed', String(button.dataset.level === level));
-        });
+        App.ui.syncPressed(levelButtons, (button) => button.dataset.level === level);
         paintLevelHint();
         App.sound.click();
       }
@@ -199,6 +198,7 @@
         questionEl.textContent = currentQuestion.text;
         feedback.textContent = '';
         optionsEl.replaceChildren();
+        optionButtons = [];
 
         currentQuestion.options.forEach((option) => {
           const button = el('button', {
@@ -208,6 +208,7 @@
           });
           button.addEventListener('click', () => answer(option, button));
           optionsEl.append(button);
+          optionButtons.push(button);
         });
 
         paintHud();
@@ -218,7 +219,7 @@
         locked = true;
         answered += 1;
         const correct = value === currentQuestion.answer;
-        optionsEl.querySelectorAll('button').forEach((optionButton) => {
+        optionButtons.forEach((optionButton) => {
           optionButton.disabled = true;
           if (Number(optionButton.textContent) === currentQuestion.answer) {
             optionButton.classList.add('is-correct');
@@ -330,10 +331,10 @@
       }, 100);
 
       ctx.on(window, 'keydown', (event) => {
-        if (state !== 'playing' || locked) return;
+        if (event.repeat || state !== 'playing' || locked) return;
         const number = Number(event.key);
         if (number >= 1 && number <= 4) {
-          const button = optionsEl.querySelectorAll('button')[number - 1];
+          const button = optionButtons[number - 1];
           if (button) button.click();
         }
       });
